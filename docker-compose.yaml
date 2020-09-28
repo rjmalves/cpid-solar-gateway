@@ -1,0 +1,27 @@
+version: "3.5"
+
+services:
+  mongo:
+    tty: true
+    stdin_open: true
+    image: "mongo"
+    ports:
+      - 27017:27017
+    volumes:
+      - db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+  cpid-solar-gateway:
+    tty: true
+    stdin_open: true
+    restart: always
+    build:
+      context: .
+    depends_on:
+      - mongo
+    env_file: .env
+
+volumes:
+  db:
