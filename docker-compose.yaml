@@ -19,6 +19,8 @@ services:
     restart: always
     build:
       context: .
+    ports:
+      - 50051:50051
     depends_on:
       - mongo
     env_file: .env
