@@ -15,12 +15,12 @@ func Run() {
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_DATABASE")); err != nil {
+		os.Getenv("DB_DATABASE"),
+		os.Getenv("MODE")); err != nil {
 		log.Fatalf("Error initializing the service: %v", err)
 	}
 	// seed.Load(s.DB)
-	if err := s.Run(os.Getenv("SERVICE_PORT"),
-		os.Getenv("MODE")); err != nil {
+	if err := s.Run(os.Getenv("SERVICE_PORT")); err != nil {
 		log.Fatalf("Error running the service: %v", err)
 	}
 }

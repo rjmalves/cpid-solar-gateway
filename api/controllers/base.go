@@ -22,7 +22,7 @@ type Server struct {
 }
 
 // Initialize : prepares the service to launch
-func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase string) error {
+func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase, mode string) error {
 	// Connects with the database
 	mongoURI := fmt.Sprintf("mongodb://%v:%v@%v:%v/%v", DBUser, DBPassword, DBHost, DBPort, DBDatabase)
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
@@ -56,6 +56,18 @@ func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase strin
 			return err
 		}
 	}
+	// Checks if the mode is valid for running the server
+	validModes := []string{"debug", "release"}
+	valid := false
+	for _, m := range validModes {
+		if mode == m {
+			valid = true
+		}
+	}
+	if !valid {
+		return fmt.Errorf("Service execution mode not valid")
+	}
+	gin.SetMode(mode)
 	// Creates the HTTP router
 	s.Router = gin.Default()
 	config := cors.DefaultConfig()
@@ -85,24 +97,12 @@ func (s *Server) Terminate() error {
 }
 
 // Run : runs the service and recovers errors
-func (s *Server) Run(servicePort, mode string) error {
+func (s *Server) Run(servicePort string) error {
 	defer s.Terminate()
-	// Checks if the mode is valid for running the server
-	validModes := []string{"debug", "release"}
-	valid := false
-	for _, m := range validModes {
-		if mode == m {
-			valid = true
-		}
-	}
-	if !valid {
-		return fmt.Errorf("Service execution mode not valid")
-	}
 	// Hosts the API
 	go func() {
 		addr := ":" + servicePort
 		for {
-			gin.SetMode(mode)
 			if err := s.Router.Run(addr); err != nil {
 				log.Printf("Error serving the API: %v\n", err)
 			}
