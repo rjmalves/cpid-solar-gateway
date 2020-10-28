@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.15-alpine as builder
 
 WORKDIR /go/src/cpid-solar-gateway
 COPY go.mod .
