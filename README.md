@@ -20,3 +20,15 @@ In order to display the required data, some models have been defined in the give
 
 
 ![Classes](docs/images/class-diagrams.png)
+
+## Required environment variables
+
+Following the `.env.example` file, the required configuration for this service is:
+
+1. DB_HOST: the name or address that identifies the MongoDB instance  
+2. DB_PORT: the port of the MongoDB instance  
+3. DB_USER: the user with permissions in the DB  
+4. DB_PASSWORD: the password for the given user  
+5. DB_DATABASE: the database for which the user has permissions  
+6. MODE: the execution mode of the service. Can be `debug` or `release`  
+7. SERVICE_PORT: the port on which the service will listen  
