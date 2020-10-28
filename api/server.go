@@ -19,7 +19,7 @@ func Run() {
 		os.Getenv("MODE")); err != nil {
 		log.Fatalf("Error initializing the service: %v", err)
 	}
-	// seed.Load(s.DB)
+
 	if err := s.Run(os.Getenv("SERVICE_PORT")); err != nil {
 		log.Fatalf("Error running the service: %v", err)
 	}
