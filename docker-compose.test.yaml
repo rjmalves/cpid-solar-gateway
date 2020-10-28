@@ -1,0 +1,25 @@
+version: "3.5"
+
+services:
+  mongo-test:
+    tty: true
+    stdin_open: true
+    image: "mongo"
+    volumes:
+      - db-test:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+  cpid-solar-gateway-test:
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - mongo-test
+    env_file: .env.test
+
+volumes:
+  db-test:
