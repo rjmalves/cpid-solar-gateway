@@ -5,8 +5,8 @@ services:
     tty: true
     stdin_open: true
     image: "mongo"
-    volumes:
-      - db-test:/data/db
+    ports:
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
@@ -20,6 +20,3 @@ services:
     depends_on:
       - mongo-test
     env_file: .env.test
-
-volumes:
-  db-test:

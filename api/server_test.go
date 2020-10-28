@@ -1,14 +1,10 @@
-package tests
+package api
 
 import (
 	"log"
 	"os"
 	"testing"
-
-	"github.com/rjmalves/cpid-solar-gateway/api/controllers"
 )
-
-var s = controllers.Server{}
 
 func TestMain(m *testing.M) {
 

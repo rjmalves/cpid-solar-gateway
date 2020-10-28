@@ -2,7 +2,6 @@ package seed
 
 import (
 	"math/rand"
-	"time"
 
 	"github.com/rjmalves/cpid-solar-gateway/api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,7 +28,7 @@ func LoadTelemetryData(db *mongo.Database) error {
 		// Generates with random values and then attributes an inverter
 		td := models.TelemetryData{
 			Module:            "MODULE-X",
-			LastTelemetryTime: time.Now().Unix() + tos[i],
+			LastTelemetryTime: tos[i],
 			OutputVoltage:     rand.Float64() * 280,
 			InputVoltage:      rand.Float64() * 280,
 			InputCurrent:      rand.Float64() * 10,
