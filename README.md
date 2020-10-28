@@ -32,3 +32,21 @@ Following the `.env.example` file, the required configuration for this service i
 5. DB_DATABASE: the database for which the user has permissions  
 6. MODE: the execution mode of the service. Can be `debug` or `release`  
 7. SERVICE_PORT: the port on which the service will listen  
+
+## Testing procedure
+
+In order to run tests in an docker environment, the `docker-compose.test.yaml` and `.env.test files have been developed. To run a docker test one must type:
+```
+docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit
+```
+A brief coverage report is shown in the console log.  
+If one wants to inspect in a more detailed way, the environment variables must be defined locally and the `mongo-test` service must be launched separately, with the port mapping to the current machine. After that, one might run in the console:
+```
+go test ./api -v -coverpkg=./api/... -coverprofile cover.html && go tool cover -html cover.html
+```
+An interface for exploring covered and uncovered code will be launched in the browser, allowing the developer to improve the program testing.
+To clear the written data after the local tests, one can use:
+```
+docker-compose -f docker-compose.test.yaml down
+docker volume prune -f
+```

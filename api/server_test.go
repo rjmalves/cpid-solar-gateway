@@ -3,14 +3,12 @@ package api
 import (
 	"log"
 	"os"
-
-	"github.com/rjmalves/cpid-solar-gateway/api/controllers"
+	"testing"
 )
 
-var s = controllers.Server{}
+func TestMain(m *testing.M) {
 
-// Run : launches the service
-func Run() {
+	// Initializes the application
 	if err := s.Initialize(os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
@@ -20,7 +18,5 @@ func Run() {
 		log.Fatalf("Error initializing the service: %v", err)
 	}
 
-	if err := s.Run(os.Getenv("SERVICE_PORT")); err != nil {
-		log.Fatalf("Error running the service: %v", err)
-	}
+	os.Exit(m.Run())
 }

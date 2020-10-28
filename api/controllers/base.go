@@ -22,7 +22,7 @@ type Server struct {
 }
 
 // Initialize : prepares the service to launch
-func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase string) error {
+func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase, mode string) error {
 	// Connects with the database
 	mongoURI := fmt.Sprintf("mongodb://%v:%v@%v:%v/%v", DBUser, DBPassword, DBHost, DBPort, DBDatabase)
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
@@ -50,12 +50,28 @@ func (s *Server) Initialize(DBHost, DBPort, DBUser, DBPassword, DBDatabase strin
 			telemetryCollFound = true
 		}
 	}
-	shouldSetup := !(inverterCollFound && telemetryCollFound)
-	if shouldSetup {
-		if err := s.DBSetup(ctx); err != nil {
+	if !inverterCollFound {
+		if err := s.SetupInverterCollection(ctx); err != nil {
 			return err
 		}
 	}
+	if !telemetryCollFound {
+		if err := s.SetupTelemetryDataCollection(ctx); err != nil {
+			return err
+		}
+	}
+	// Checks if the mode is valid for running the server
+	validModes := []string{"debug", "release"}
+	valid := false
+	for _, m := range validModes {
+		if mode == m {
+			valid = true
+		}
+	}
+	if !valid {
+		return fmt.Errorf("Service execution mode not valid")
+	}
+	gin.SetMode(mode)
 	// Creates the HTTP router
 	s.Router = gin.Default()
 	config := cors.DefaultConfig()
@@ -85,24 +101,12 @@ func (s *Server) Terminate() error {
 }
 
 // Run : runs the service and recovers errors
-func (s *Server) Run(servicePort, mode string) error {
+func (s *Server) Run(servicePort string) error {
 	defer s.Terminate()
-	// Checks if the mode is valid for running the server
-	validModes := []string{"debug", "release"}
-	valid := false
-	for _, m := range validModes {
-		if mode == m {
-			valid = true
-		}
-	}
-	if !valid {
-		return fmt.Errorf("Service execution mode not valid")
-	}
 	// Hosts the API
 	go func() {
 		addr := ":" + servicePort
 		for {
-			gin.SetMode(mode)
 			if err := s.Router.Run(addr); err != nil {
 				log.Printf("Error serving the API: %v\n", err)
 			}
@@ -116,8 +120,8 @@ func (s *Server) Run(servicePort, mode string) error {
 	return nil
 }
 
-// DBSetup : setups the DB collections in the first launch
-func (s *Server) DBSetup(ctx context.Context) error {
+// SetupInverterCollection : setups the inverter collection with constraints and rules
+func (s *Server) SetupInverterCollection(ctx context.Context) error {
 	// Creates collections with existence rules
 	opts := options.CreateCollection()
 	opts.SetCapped(true)
@@ -125,11 +129,7 @@ func (s *Server) DBSetup(ctx context.Context) error {
 	if err := s.DB.CreateCollection(ctx, "inverters", opts); err != nil {
 		return err
 	}
-	if err := s.DB.CreateCollection(ctx, "telemetryData", opts); err != nil {
-		return err
-	}
 	iCol := s.DB.Collection("inverters")
-	tCol := s.DB.Collection("telemetryData")
 	// Creates unique indexes
 	iMod := mongo.IndexModel{
 		Keys: bson.M{
@@ -137,6 +137,23 @@ func (s *Server) DBSetup(ctx context.Context) error {
 		},
 		Options: options.Index().SetUnique(true),
 	}
+	if _, err := iCol.Indexes().CreateOne(ctx, iMod); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetupTelemetryDataCollection : setups the telemetry data collection with constraints and rules
+func (s *Server) SetupTelemetryDataCollection(ctx context.Context) error {
+	// Creates collections with existence rules
+	opts := options.CreateCollection()
+	opts.SetCapped(true)
+	opts.SetSizeInBytes(1e11)
+	if err := s.DB.CreateCollection(ctx, "telemetryData", opts); err != nil {
+		return err
+	}
+	tCol := s.DB.Collection("telemetryData")
+	// Creates unique indexes
 	tMod := mongo.IndexModel{
 		Keys: bson.M{
 			"serial":            -1,
@@ -144,10 +161,29 @@ func (s *Server) DBSetup(ctx context.Context) error {
 		},
 		Options: options.Index().SetUnique(true),
 	}
-	if _, err := iCol.Indexes().CreateOne(ctx, iMod); err != nil {
+	if _, err := tCol.Indexes().CreateOne(ctx, tMod); err != nil {
 		return err
 	}
-	if _, err := tCol.Indexes().CreateOne(ctx, tMod); err != nil {
+	return nil
+}
+
+// RefreshInverterCollection : deletes all the inverters in the DB
+func (s *Server) RefreshInverterCollection(ctx context.Context) error {
+	if err := s.DB.Collection("inverters").Drop(ctx); err != nil {
+		return err
+	}
+	if err := s.SetupInverterCollection(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+// RefreshTelemetryDataCollection : deletes all the telemetry data in the DB
+func (s *Server) RefreshTelemetryDataCollection(ctx context.Context) error {
+	if err := s.DB.Collection("telemetryData").Drop(ctx); err != nil {
+		return err
+	}
+	if err := s.SetupTelemetryDataCollection(ctx); err != nil {
 		return err
 	}
 	return nil
