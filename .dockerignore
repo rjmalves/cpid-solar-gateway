@@ -1,0 +1,5 @@
+./docs/**
+docker-compose.**
+.env**
+LICENSE
+README.md
