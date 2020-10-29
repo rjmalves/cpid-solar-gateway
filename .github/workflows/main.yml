@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup docker buildx
-      - users: docker/setup-buildx-action@v1
+      - uses: docker/setup-buildx-action@v1
 
       - name: Build docker test images
         run: docker-compose -f docker-compose.test.yaml build
