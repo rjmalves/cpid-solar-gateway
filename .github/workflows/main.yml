@@ -11,12 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout code from GitHub
       - uses: actions/checkout@v2
 
-      - name: Builds docker test images
+      - name: Setup docker buildx
+      - users: docker/setup-buildx-action@v1
+
+      - name: Build docker test images
         run: docker-compose -f docker-compose.test.yaml build
   
-      - name: Runs tests inside docker environment
+      - name: Run tests inside docker environment
         run: docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit
 
       - name: Login to DockerHub
