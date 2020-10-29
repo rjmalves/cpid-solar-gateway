@@ -63,7 +63,7 @@ func TestAPIv1ListInverters(t *testing.T) {
 	}
 	assert.Equal(t, len(invs), len(data))
 	for i := range invs {
-		checkInverters(t, *invs[i], data[i])
+		assert.Equal(t, *invs[i], data[i])
 	}
 }
 
@@ -118,5 +118,5 @@ func TestAPIv1GetInverterBySerialSuccess(t *testing.T) {
 		t.Errorf("Error while reading inverter from DB: %v\n", err)
 		return
 	}
-	checkInverters(t, i, data)
+	assert.Equal(t, i, data)
 }
