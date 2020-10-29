@@ -21,11 +21,6 @@ func (s *Server) GetInverters(c *gin.Context) {
 // GetInverter : handler for getting a single inverter from the DB
 func (s *Server) GetInverter(c *gin.Context) {
 	serial := c.Param("serial")
-	if len(serial) == 0 {
-		errMes := "Invalid given serial"
-		answerError(c, http.StatusBadRequest, errMes)
-		return
-	}
 	i := &models.Inverter{
 		Serial: serial,
 	}
