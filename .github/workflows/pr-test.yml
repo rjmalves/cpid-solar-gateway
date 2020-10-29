@@ -1,0 +1,19 @@
+name: PR Testing
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code from repo
+        uses: actions/checkout@v2
+
+      - name: Build test images
+        run: docker-compose -f docker-compose.test.yaml build
+  
+      - name: Run tests inside docker environment
+        run: docker-compose -f docker-compose.test.yaml up --abort-on-container-exit
