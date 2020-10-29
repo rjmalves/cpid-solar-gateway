@@ -39,7 +39,6 @@ func checkInverters(t *testing.T, inv1, inv2 models.Inverter) {
 
 func TestMain(m *testing.M) {
 
-	// Initializes the application
 	if err := s.Initialize(os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
@@ -50,4 +49,6 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(m.Run())
+
+	s.Terminate()
 }
